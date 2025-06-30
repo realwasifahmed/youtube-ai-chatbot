@@ -7,22 +7,24 @@ from langchain.chains import ConversationalRetrievalChain
 import google.generativeai as genai
 
 
-def create_vector_db_from_youtube(url: str) -> FAISS:
-  # Load YouTube transcript
+def create_vector_db_from_youtube(url):
+  from langchain_community.document_loaders import YoutubeLoader
+
   loader = YoutubeLoader.from_youtube_url(url)
-  transcript = loader.load()
 
-  # Split text into chunks
-  text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,
-                                                 chunk_overlap=100)
-  docs = text_splitter.split_documents(transcript)
+  try:
+    transcript = loader.load()
+  except Exception as e:
+    raise ValueError(f"Failed to fetch transcript: {str(e)}")
 
-  # Create vector store
-  embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-  db = FAISS.from_documents(docs, embeddings)
-  db.save_local("faiss_index")
-  return db
+  if not transcript:
+    raise ValueError("Transcript is empty or not available for this video.")
 
+  # Now continue only if transcript is valid
+  vectorstore = FAISS.from_documents(transcript, GoogleGenerativeAIEmbeddings(model="models/embedding-001"))
+  vectorstore.save_local("faiss_index")
+
+  return vectorstore
 
 def get_response_from_query(db, query, k=8):
   if db is None:

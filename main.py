@@ -39,8 +39,19 @@ def main():
         url = st.text_input("Enter YouTube URL:", key="youtube_url_input")
         if url:
             # Assuming the function returns a vector database
-            st.session_state.db = create_vector_db_from_youtube(url)
-            st.success("Video transcript loaded and vectorized!")
+            try:
+                st.session_state.db = create_vector_db_from_youtube(url)
+                st.success("Video transcript loaded and vectorized!")
+            except Exception as e:
+                st.session_state.db = None
+                st.markdown("""
+                ✅ Try videos that have **auto-generated captions** enabled.
+
+                ❌ Avoid YouTube Shorts, music videos, or region-locked/private videos.
+
+                Example to test: [How LLMs Work (DeepMind)](https://www.youtube.com/watch?v=2LhoCfjm8R4)
+                """)
+                st.stop()
 
             # Ask the user to enter a question after the video is loaded
             query = st.text_area("Enter your question (or 'q' to go back):", key="query_input")
