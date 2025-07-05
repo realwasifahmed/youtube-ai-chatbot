@@ -21,7 +21,7 @@ def create_vector_db_from_youtube(url):
     raise ValueError("Transcript is empty or not available for this video.")
 
   # Now continue only if transcript is valid
-  vectorstore = FAISS.from_documents(transcript, GoogleGenerativeAIEmbeddings(model="models/embedding-001"))
+  vectorstore = FAISS.from_documents(transcript, GoogleGenerativeAIEmbeddings(model="models/embedding-001",))
   vectorstore.save_local("faiss_index")
 
   return vectorstore
